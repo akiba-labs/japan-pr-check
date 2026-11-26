@@ -2,7 +2,8 @@
 
 Free checker for Japan's **permanent residence guideline (永住許可に関するガイドライン)**, revised by the Immigration Services Agency on **2026-10-01**: which version applies to your filing date, when you meet the time-in-Japan requirement, and which of the objective factors are open.
 
-- Live: https://japan-pr-check.vercel.app
+- Full app and API (Vercel): https://japan-pr-check.vercel.app
+- Checker (GitHub Pages): https://akiba-labs.github.io/japan-pr-check/
 - API: `GET/POST /api/check`, `GET /api/rules`
 - Agent docs: `/llms.txt`, `/openapi.json`, `/.well-known/ai-plugin.json`
 - MCP tool: `japan_permanent_residency_check` on https://free-agent-tools.vercel.app/mcp
@@ -37,4 +38,9 @@ Sources: ISA [10_00279](https://www.moj.go.jp/isa/10_00279.html), [PDF 001471577
 npm ci
 npm test
 npm run build
+npm run build:pages
 ```
+
+`npm run build` is the Vercel app (checker, JSON API, share pages). `npm run build:pages` writes a static `out/` for GitHub Pages and checks that internal links and assets resolve under `/japan-pr-check`. Server routes stay in the repo; the Pages script only moves them aside for that build.
+
+GitHub settings: **Settings → Pages → Build and deployment → Source: GitHub Actions**. Pushes to `main` deploy with `.github/workflows/pages.yml`. The copy-paste steps for the other tool repos are at the top of `scripts/build-pages.mjs`.
