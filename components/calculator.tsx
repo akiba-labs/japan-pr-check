@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { CardDisclaimer } from "@/components/card-disclaimer";
 import { ShareBar } from "@/components/share-bar";
+import { isGithubPages, pagesSiteUrl } from "@/lib/hosting";
 import { PERIODS, PERIOD_LABEL, ROUTES, ROUTE_LABEL, STATUSES, STATUS_LABEL, checkPr, type Period, type Route, type Status, type YesNo } from "@/lib/pr";
 import { BAND_SHORT, EXAMPLE_SHARED, PUBLIC_URL, ROUTE_SHORT, fmtDate, resultPath, toCheckInput, type Shared } from "@/lib/share";
 
@@ -94,7 +95,7 @@ export function Calculator({ initial }: { initial?: Shared }) {
       return null;
     }
   })();
-  const shareUrl = `${PUBLIC_URL}${resultPath(shared)}`;
+  const shareUrl = isGithubPages ? `${pagesSiteUrl(PUBLIC_URL)}/` : `${PUBLIC_URL}${resultPath(shared)}`;
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_1.15fr]">
@@ -238,6 +239,9 @@ export function Calculator({ initial }: { initial?: Shared }) {
                 Fee if granted: ¥{result.fee.permanentResidencePermissionJPY.toLocaleString("en-US")} (from Oct 1, 2026). {result.notes[result.notes.length - 2]}
               </p>
               <div className="mt-5">
+                {isGithubPages ? (
+                  <p className="mb-3 text-xs leading-relaxed text-muted">Share the checker. A link to this exact result returns when hosting is back.</p>
+                ) : null}
                 <ShareBar url={shareUrl} text={`Japan PR guideline check: ${result.summaryLabel} (${ROUTE_SHORT[result.route]}, filed ${result.applicationDate}) – free tool`} />
               </div>
             </>

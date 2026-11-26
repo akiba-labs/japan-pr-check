@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Calculator } from "@/components/calculator";
 import { FaqSection, type FaqItem } from "@/components/faq-section";
+import { API_PAUSED_NOTE, isGithubPages, pagesSiteUrl, withBasePath } from "@/lib/hosting";
 import { RULES, SOURCES } from "@/lib/pr";
 import { EXAMPLE_GENERAL, EXAMPLE_SHARED, PUBLIC_URL, resultPath } from "@/lib/share";
 
@@ -21,7 +22,7 @@ const webAppLd = {
   "@type": "WebApplication",
   name: "Japan PR Guideline Check",
   alternateName: ["Japan permanent residency checker", "永住許可 ガイドライン 改定 チェック", "永住 申請 新ガイドライン 判定"],
-  url: PUBLIC_URL,
+  url: isGithubPages ? pagesSiteUrl(PUBLIC_URL) : PUBLIC_URL,
   applicationCategory: "ReferenceApplication",
   operatingSystem: "Any",
   isAccessibleForFree: true,
@@ -78,7 +79,9 @@ const faq: FaqItem[] = [
   },
   {
     q: "Is there a free API for AI agents?",
-    a: `Yes. GET or POST ${PUBLIC_URL}/api/check (keyless, CORS open), all rules at /api/rules, OpenAPI at /openapi.json, llms.txt, and the MCP tool japan_permanent_residency_check on free-agent-tools.vercel.app/mcp. Every response carries rulesAsOf, sources and a disclaimer.`,
+    a: isGithubPages
+      ? API_PAUSED_NOTE
+      : `Yes. GET or POST ${PUBLIC_URL}/api/check (keyless, CORS open), all rules at /api/rules, OpenAPI at /openapi.json, llms.txt, and the MCP tool japan_permanent_residency_check on free-agent-tools.vercel.app/mcp. Every response carries rulesAsOf, sources and a disclaimer.`,
   },
   {
     q: "永住許可ガイドラインの改定はいつから適用されますか？",
@@ -107,12 +110,12 @@ export default function HomePage() {
           Your filing date decides. Until March 31, 2027 most of the old rules still apply; from April 1, 2027 spouses need 5 + 3 years, intra-company transferee years stop counting, long trips abroad count against you and Japanese B1 becomes a factor. Enter your dates to see the version that applies, when you meet the time requirement, and which factors are open.
         </p>
         <p className="mt-3 text-sm text-muted">
-          Examples:{" "}
-          <a className="underline underline-offset-2 hover:text-foreground" href={resultPath(EXAMPLE_SHARED)}>
+          {isGithubPages ? "Examples (open the checker):" : "Examples:"}{" "}
+          <a className="underline underline-offset-2 hover:text-foreground" href={isGithubPages ? withBasePath("/") : resultPath(EXAMPLE_SHARED)}>
             spouse filing Feb 2027
           </a>
           {" · "}
-          <a className="underline underline-offset-2 hover:text-foreground" href={resultPath(EXAMPLE_GENERAL)}>
+          <a className="underline underline-offset-2 hover:text-foreground" href={isGithubPages ? withBasePath("/") : resultPath(EXAMPLE_GENERAL)}>
             10-year route with a 7-month trip
           </a>
         </p>
@@ -162,18 +165,28 @@ export default function HomePage() {
 
       <section className="mt-12 max-w-3xl rounded-3xl border border-line bg-panel/40 p-5 sm:p-6">
         <h2 className="text-lg font-semibold text-foreground">For AI agents and developers</h2>
-        <p className="mt-2 text-sm text-muted">
-          Keyless JSON, CORS open, GET or POST:{" "}
-          <a className="font-mono text-foreground underline underline-offset-2 break-all" href="/api/check?route=spouse&applicationDate=2027-02-15&residenceSince=2025-09-01&marriageDate=2023-06-10&periodOfStay=3y">
-            /api/check?route=spouse&amp;applicationDate=2027-02-15&amp;residenceSince=2025-09-01&amp;marriageDate=2023-06-10&amp;periodOfStay=3y
-          </a>
-          . All rules: <a className="font-mono text-foreground underline underline-offset-2" href="/api/rules">/api/rules</a>. Docs: <a className="underline underline-offset-2" href="/openapi.json">OpenAPI</a>,{" "}
-          <a className="underline underline-offset-2" href="/llms.txt">llms.txt</a>, MCP tool <span className="font-mono text-foreground">japan_permanent_residency_check</span> on{" "}
-          <a className="underline underline-offset-2" href="https://free-agent-tools.vercel.app" target="_blank" rel="noopener noreferrer">
-            free-agent-tools
-          </a>
-          .
-        </p>
+        {isGithubPages ? (
+          <p className="mt-2 text-sm text-muted">
+            {API_PAUSED_NOTE}{" "}
+            <a className="underline underline-offset-2" href={withBasePath("/llms.txt")}>
+              llms.txt
+            </a>{" "}
+            describes the checker and the API contract.
+          </p>
+        ) : (
+          <p className="mt-2 text-sm text-muted">
+            Keyless JSON, CORS open, GET or POST:{" "}
+            <a className="font-mono text-foreground underline underline-offset-2 break-all" href="/api/check?route=spouse&applicationDate=2027-02-15&residenceSince=2025-09-01&marriageDate=2023-06-10&periodOfStay=3y">
+              /api/check?route=spouse&amp;applicationDate=2027-02-15&amp;residenceSince=2025-09-01&amp;marriageDate=2023-06-10&amp;periodOfStay=3y
+            </a>
+            . All rules: <a className="font-mono text-foreground underline underline-offset-2" href="/api/rules">/api/rules</a>. Docs: <a className="underline underline-offset-2" href="/openapi.json">OpenAPI</a>,{" "}
+            <a className="underline underline-offset-2" href="/llms.txt">/llms.txt</a>, MCP tool <span className="font-mono text-foreground">japan_permanent_residency_check</span> on{" "}
+            <a className="underline underline-offset-2" href="https://free-agent-tools.vercel.app" target="_blank" rel="noopener noreferrer">
+              free-agent-tools
+            </a>
+            .
+          </p>
+        )}
       </section>
 
       <FaqSection items={faq} heading="Japan PR guideline questions" />
